@@ -53,13 +53,13 @@ locals {
   template_name_timestamp = formatdate("YYYY-MM-DD-HH-mm-ss-aa", var.raw_timestamp)
   template_description_date = formatdate("EEEE D MMMM YYYY", var.raw_timestamp)
   template_description_time = formatdate("HH:mm:ss aa", var.raw_timestamp)
-  template_name        = "debian-bookworm-${var.proxmox_node}-${local.template_name_timestamp}"
+  template_name        = "debian-trixie-${var.proxmox_node}-${local.template_name_timestamp}"
 }
 
 source "proxmox-iso" "debian-bookworm" {
   boot_iso {
-    iso_url = "https://cdimage.debian.org/debian-cd/12.11.0/amd64/iso-cd/debian-12.11.0-amd64-netinst.iso"
-    iso_checksum = "sha512:0921d8b297c63ac458d8a06f87cd4c353f751eb5fe30fd0d839ca09c0833d1d9934b02ee14bbd0c0ec4f8917dde793957801ae1af3c8122cdf28dde8f3c3e0da"
+    iso_url = "https://cdimage.debian.org/debian-cd/13.1.0/amd64/iso-cd/debian-13.1.0-amd64-netinst.iso"
+    iso_checksum = "sha512:873e9aa09a913660b4780e29c02419f8fb91012c8092e49dcfe90ea802e60c82dcd6d7d2beeb92ebca0570c49244eee57a37170f178a27fe1f64a334ee357332"
     type = "ide"
     iso_storage_pool = "iso-storage"
     unmount = true
@@ -87,8 +87,8 @@ source "proxmox-iso" "debian-bookworm" {
   ]
 
   template_name        = local.template_name
-  template_description = "Debian Bookworm Template, generated on ${local.template_description_date} at ${local.template_description_time} ${var.timezone}."
-  tags = "debian-bookworm;packer;template"
+  template_description = "Debian Trixie Template, generated on ${local.template_description_date} at ${local.template_description_time} ${var.timezone}."
+  tags = "debian-trixie;packer;template"
   os = "l26" #+
   bios = "ovmf"
   scsi_controller = "virtio-scsi-single"
@@ -121,7 +121,7 @@ source "proxmox-iso" "debian-bookworm" {
 }
 
 build {
-  sources = ["proxmox-iso.debian-bookworm"]
+  sources = ["proxmox-iso.debian-trixie"]
 
   provisioner "shell" {
     inline = [
