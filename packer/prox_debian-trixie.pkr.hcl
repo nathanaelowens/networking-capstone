@@ -56,7 +56,7 @@ locals {
   template_name        = "debian-trixie-${var.proxmox_node}-${local.template_name_timestamp}"
 }
 
-source "proxmox-iso" "debian-bookworm" {
+source "proxmox-iso" "debian-trixie" {
   boot_iso {
     iso_url = "https://cdimage.debian.org/debian-cd/13.1.0/amd64/iso-cd/debian-13.1.0-amd64-netinst.iso"
     iso_checksum = "sha512:873e9aa09a913660b4780e29c02419f8fb91012c8092e49dcfe90ea802e60c82dcd6d7d2beeb92ebca0570c49244eee57a37170f178a27fe1f64a334ee357332"
@@ -65,7 +65,7 @@ source "proxmox-iso" "debian-bookworm" {
     unmount = true
   }
 
-  http_directory    = "debian-bookworm/http"
+  http_directory    = "debian-trixie/http"
 
   proxmox_url = var.proxmox_url
   insecure_skip_tls_verify = true
