@@ -65,6 +65,9 @@ source "proxmox-iso" "debian-trixie" {
     unmount = true
   }
 
+  # Give Packer more time to wait on long PVE tasks (downloads, etc.)
+  task_timeout = "10m"
+
   http_directory    = "debian-trixie/http"
 
   proxmox_url = var.proxmox_url
@@ -138,6 +141,7 @@ build {
     "[Service]",
     "ExecStartPost=/usr/bin/udevadm trigger /dev/mapper/%i",
     "EOL",
+    "sudo rm -f /etc/netplan/00-installer-config.yaml", # Remove installer-generated netplan file
     "usermod -p '!' root", # Make root account unable to be logged into
     "sed -i 's/PermitRootLogin yes/#PermitRootLogin prohibit-password/' /etc/ssh/sshd_config",
     "DEBIAN_FRONTEND=noninteractive apt remove -y ifupdown", # Remove old ifupdown networking
