@@ -12,7 +12,7 @@ variable "proxmox_snippets_storage" {
 }
 variable "proxmox_vm_storage" {
   type    = string
-  default = "linux1"
+  default = "proxraid3"
 }
 
 variable "disk_size" {
