@@ -8,7 +8,7 @@ variable "proxmox_node" {
 }
 variable "proxmox_snippets_storage" {
   type    = string
-  default = "iso-storage"
+  default = "local"
 }
 variable "proxmox_vm_storage" {
   type    = string
