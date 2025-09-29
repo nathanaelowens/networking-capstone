@@ -36,7 +36,7 @@ variable "proxmox_token" {
 variable "storage_pool" {
   type        = string
   description = "The name of the storage pool packer will use"
-  default     = "linux1"
+  default     = "proxraid3"
 }
 
 variable "raw_timestamp" {
@@ -61,12 +61,12 @@ source "proxmox-iso" "debian-trixie" {
     iso_url = "https://cdimage.debian.org/debian-cd/13.1.0/amd64/iso-cd/debian-13.1.0-amd64-netinst.iso"
     iso_checksum = "sha512:873e9aa09a913660b4780e29c02419f8fb91012c8092e49dcfe90ea802e60c82dcd6d7d2beeb92ebca0570c49244eee57a37170f178a27fe1f64a334ee357332"
     type = "ide"
-    iso_storage_pool = "iso-storage"
+    iso_storage_pool = "local"
     unmount = true
   }
 
   # Give Packer more time to wait on long PVE tasks (downloads, etc.)
-  task_timeout = "10m"
+  task_timeout = "20m"
 
   http_directory    = "debian-trixie/http"
 

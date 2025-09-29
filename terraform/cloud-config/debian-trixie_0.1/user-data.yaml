@@ -1,0 +1,16 @@
+#cloud-config
+hostname: ${ hostname }
+fqdn: ${ hostname }.${ domain }
+manage_etc_hosts: localhost
+timezone: America/Chicago
+package_upgrade: false
+users:
+  - name: groot
+    gecos: I AM GROOT
+    primary_group: groot
+    groups: sudo
+    lock_passwd: false
+    shell: /bin/bash
+    passwd: $6$xyz$DRW03Xv12qZpPjk82QRRdXpX99o.DFZhmQx..jNBu.kb76TmDrzzJ3y8Ob0vcdDcqs/oyxxXu.Ly7KUUuoeQH1
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBeZjLleKniYbOTl5nmPvYUrXq6TP1cOrqsf04u2DtpF nathan@commodore

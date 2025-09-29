@@ -1,0 +1,26 @@
+#network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    %{ if autodetect_net_if }ethwild:
+      match:
+        name: en*
+    %{ else }${ net_if0 }:%{ endif }
+      dhcp4: false
+      dhcp6: false
+      accept-ra: true
+      ipv6-privacy: false
+      %{ if ipv6_address == null && ipv6_token != null }ipv6-address-token: ${ ipv6_token }%{ endif }
+      %{ if ip_address != null || ipv6_address != null || ipv6_addresses != null }addresses:
+          %{ if ip_address != null }- ${ ip_address }%{ endif }
+          %{ if ipv6_address != null }- ${ ipv6_address }%{ endif }
+          %{ if ipv6_addresses != null }%{ for ipv6_address in ipv6_addresses }
+          - ${ ipv6_address }%{ endfor }%{ endif }%{ else }%{ endif }
+      routes:
+        - to: 0.0.0.0/0
+          via: ${ ip_default_gateway }
+      nameservers:
+        search:%{ for search_domain in search_domains }
+          - ${ search_domain }%{ endfor }
+        addresses:%{ for dns_server in dns_servers }
+          - ${ dns_server }%{ endfor }
