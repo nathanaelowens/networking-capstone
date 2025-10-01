@@ -1,0 +1,9 @@
+---
+# defaults file for firewalld-base
+
+firewall_open_ports: []
+firewall_closed_ports: []
+firewall_open_services: []
+firewall_closed_services: []
+
+docker_present: true

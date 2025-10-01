@@ -1,0 +1,108 @@
+---
+# tasks file for firewalld-base
+
+- name: Ensure firewalld is installed
+  package:
+    name: firewalld
+    state: present
+
+- name: Divert firewalld service file
+  community.general.dpkg_divert:
+    path: /etc/systemd/system/firewalld.service
+    rename: true
+
+- name: Install custom firewalld.service to fix cloud-init ordering cycles
+  copy:
+    src: firewalld.service
+    dest: /etc/systemd/system/firewalld.service
+    owner: root
+    group: root
+
+- name: Start and enable firewalld
+  ansible.builtin.systemd_service:
+    name: firewalld
+    state: started
+    enabled: yes
+    daemon_reload: true
+
+- name: Set Firewalld logging level to "all"
+  ansible.builtin.lineinfile:
+    path: /etc/firewalld/firewalld.conf
+    regexp: '^LogDenied='
+    line: 'LogDenied=all'
+  notify: Reload firewalld
+
+- name: Disable iptables setting in Docker configuration
+  template:
+    src: docker-daemon.json.j2
+    dest: /etc/docker/daemon.json
+  when: docker_present
+  notify: Restart node # Wish I didn't have to, but it's the only thing that works
+
+- name: Add masquerading for Docker ingress and egress
+  firewalld:
+    zone: public
+    masquerade: yes
+    permanent: yes
+    state: enabled
+  when: docker_present
+
+- name: Detect network interfaces
+  command: ip link show
+  register: docker_interface_info
+  changed_when: false
+  when: docker_present
+
+- name: Add Docker interface to the "trusted" zone (if found)
+  firewalld:
+    zone: trusted
+    interface: docker0
+    permanent: yes
+    state: enabled
+  when: ("'docker0' in docker_interface_info.stdout") and (docker_present)
+  notify: Restart node # Wish I didn't have to but it's the only thing that works
+
+- name: Detect main ethernet interface
+  shell: ip -o -4 route show to default | awk '{print $5}'
+  register: main_interface
+  changed_when: false  # Prevent Ansible from marking this task as changed
+
+- name: Add host network interface to the "public" Zone (if needed)
+  firewalld:
+    zone: public
+    interface: "{{ main_interface.stdout }}"
+    permanent: yes
+    state: enabled
+  notify: Reload firewalld
+
+- name: Open specified ports
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  loop: "{{ firewall_open_ports | default([]) }}"
+  notify: Reload firewalld
+
+- name: Close specified ports
+  firewalld:
+    port: "{{ item }}"
+    permanent: yes
+    state: disabled
+  loop: "{{ firewall_closed_ports | default([]) }}"
+  notify: Reload firewalld
+
+- name: Open ports for specified services
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+  loop: "{{ firewall_open_services | default([]) }}"
+  notify: Reload firewalld
+
+- name: Close ports for specified services
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: disabled
+  loop: "{{ firewall_closed_services | default([]) }}"
+  notify: Reload firewalld

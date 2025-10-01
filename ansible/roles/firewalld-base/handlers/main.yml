@@ -1,0 +1,7 @@
+- name: Restart node
+  reboot:
+
+- name: Reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
