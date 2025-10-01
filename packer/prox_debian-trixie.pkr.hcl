@@ -36,7 +36,7 @@ variable "proxmox_token" {
 variable "storage_pool" {
   type        = string
   description = "The name of the storage pool packer will use"
-  default     = "proxraid3"
+  default     = "truenas-templates"
 }
 
 variable "raw_timestamp" {
