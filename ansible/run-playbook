@@ -1,0 +1,42 @@
+#!/bin/bash
+
+INVENTORY_FILE="inventory"
+VAULT_FILE="secret.yml"
+
+script_args=()
+ansible_args=()
+
+while [[ $# -gt 0 ]]; do
+    arg="$1"
+
+    case $arg in
+        --inventory)
+            INVENTORY_FILE="$2"
+            shift 2
+            ;;
+        --vault)
+            VAULT_FILE="$2"
+            shift 2
+            ;;
+        *)
+            # Add the argument to the Ansible arguments
+            ansible_args+=("$1")
+            shift
+            ;;
+    esac
+done
+
+ansible_command="ansible-playbook"
+
+# Use inventory if needed
+if [ "$INVENTORY_FILE" != "false" ]; then
+    ansible_command="$ansible_command -i $INVENTORY_FILE"
+fi
+
+# Use vault if needed
+if [ "$VAULT_FILE" != "false" ]; then
+    ansible_command="$ansible_command --ask-vault-pass --extra-vars @$VAULT_FILE"
+fi
+
+# Run the Ansible playbook command with preserved arguments
+eval "$ansible_command ${ansible_args[@]}"
