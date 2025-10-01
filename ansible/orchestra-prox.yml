@@ -21,7 +21,7 @@
     - role: deploy-docker-compose_v2
       vars:
         local_path: orchestra/traefik
-        remote_path: /home/nathan/traefik
+        remote_path: /home/groot/traefik
         env_variables:
           CF_API_EMAIL: "{{ cloudflare_email }}"
           CF_DNS_API_TOKEN: "{{ cloudflare_dns_api_token }}"
@@ -32,4 +32,4 @@
     - role: deploy-docker-compose_v2
       vars:
         local_path: orchestra/xen-orchestra
-        remote_path: /home/nathan/xen-orchestra
+        remote_path: /home/groot/xen-orchestra
