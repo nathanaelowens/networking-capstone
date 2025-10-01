@@ -1,0 +1,64 @@
+version: "3.8"
+services:
+    xen-orchestra:
+        container_name: xen-orchestra
+        image: ezka77/xen-orchestra-ce:latest
+        networks:
+            - traefik-net
+        environment:
+            - DEBUG=xo:main
+            - NODE_ENV=production
+            - XOA_PLAN=5
+            #- XO_HTTP_REDIRECTTOHTTPS=true
+            - XO_HTTP_LISTEN_PORT=80
+            #- XO_HTTPS_LISTEN_PORT=443
+            #- XO_HTTPS_LISTEN_AUTOCERT=true
+            #- XO_HTTPS_LISTEN_CERT=/certs/orchestra.crt
+            #- XO_HTTPS_LISTEN_KEY=/certs/orchestra.key
+        privileged: true
+        # SYS_ADMIN should be enough capability to use NFS mount - but not enough for SMB
+        #cap_add:
+        #  - SYS_ADMIN
+        restart: unless-stopped
+        volumes:
+            - xo-data:/storage
+            - ../certs:/certs
+        logging: &default_logging
+            driver: "json-file"
+            options:
+                max-size: "1M"
+                max-file: "2"
+        depends_on:
+            - redis
+        labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.xen-orchestra.rule=Host(`orchestra-prox.lanbeforetime.link`)"
+        - "traefik.http.routers.xen-orchestra.entrypoints=web"
+        - "traefik.http.routers.xen-orchestra.middlewares=redirect-to-https"
+        - "traefik.http.routers.xen-orchestratls.rule=Host(`orchestra-prox.lanbeforetime.link`)"
+        - "traefik.http.routers.xen-orchestratls.entrypoints=websecure"
+        - "traefik.http.routers.xen-orchestratls.tls=true"
+        # 80 is the port that the xen-orchestra container is listening to
+        - "traefik.http.services.xen-orchestra.loadbalancer.server.port=80"
+
+    redis:
+        restart: unless-stopped
+        container_name: xo-redis
+        image: redis:alpine
+        networks:
+            - traefik-net
+        command: redis-server --appendonly yes
+        volumes:
+            - redis-data:/data
+        logging:
+            <<: *default_logging
+
+volumes:
+    xo-data:
+        driver: local
+    redis-data:
+        driver: local
+
+networks:
+    traefik-net:
+        external: true

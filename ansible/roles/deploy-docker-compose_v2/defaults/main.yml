@@ -1,0 +1,5 @@
+---
+# defaults file for deploy-docker-compose
+
+delete: false
+update_images: false

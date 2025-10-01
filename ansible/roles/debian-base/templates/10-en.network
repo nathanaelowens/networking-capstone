@@ -1,0 +1,10 @@
+[Match]
+Name=en*
+
+[Network]
+DHCP=ipv6
+LinkLocalAddressing=ipv6
+Address={{ ip }}/24
+Gateway=192.168.0.1
+DNS=192.168.0.2
+Domains=home.owens.life

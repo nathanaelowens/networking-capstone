@@ -1,0 +1,103 @@
+---
+# tasks file for debian-base
+
+- name: Add hostname with FQDN to /etc/hosts
+  become: yes
+  lineinfile:
+    dest: /etc/hosts
+    line: "127.0.0.1 {{ ansible_hostname ~ ' ' ~ ansible_hostname ~ '.' ~ domain }}"
+    state: present
+  when: set_hostname
+
+- name: Update apt cache
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install packages
+  become: yes
+  package:
+    name:
+    - ca-certificates
+    - curl
+    - gnupg
+    - python3
+    - gzip
+    - unzip
+    - rsync
+    - dnsutils
+    - traceroute
+    state: present
+
+- name: Install unattended-upgrades
+  become: yes
+  apt:
+    name: unattended-upgrades
+    state: latest
+  when: unattended_upgrades
+
+- name: Disable systemd-resolved stub resolver
+  lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^DNSStubListener'
+    line: 'DNSStubListener=no'
+    state: present
+  notify: Restart systemd-resolved
+  when: not stub_resolver
+
+- name: Disable avahi-daemon by uninstalling
+  package:
+    name: avahi-daemon
+    state: absent
+  when: not avahi
+
+- name: Install avahi-daemon
+  package:
+    name: avahi-daemon
+    state: present
+  when: avahi
+- name: Enable avahi-daemon
+  ansible.builtin.service:
+    name: avahi-daemon
+    enabled: true
+    state: started
+  when: avahi
+
+## Everything below here is deprecated
+- name: Set timezone to America/Chicago
+  community.general.timezone:
+    name: America/Chicago
+  when: timezone
+
+- name: Enable systemd-networkd
+  ansible.builtin.service:
+    name: systemd-networkd
+    enabled: true
+    state: started
+  when: networkd and not cloud_init
+- name: Remove default systemd-networkd configuration if present
+  file:
+    path: "/etc/systemd/network/bookworm-template.network"
+    state: absent
+  notify: Restart systemd-networkd
+  when: networkd and not cloud_init
+- name: Apply systemd-networkd configuration template
+  template:
+    src: "10-{{ ifname }}.network"
+    dest: "/etc/systemd/network/10-{{ ifname }}.network"
+  notify: Restart systemd-networkd
+  when: networkd and not cloud_init
+
+- name: Install systemd-resolved if not included
+  become: yes
+  ignore_errors: true
+  package:
+    name:
+    - systemd-resolved
+  when: networkd or systemd_resolved
+- name: Enable systemd-resolved
+  ansible.builtin.service:
+    name: systemd-resolved
+    enabled: true
+    state: started
+  when: networkd or systemd_resolved

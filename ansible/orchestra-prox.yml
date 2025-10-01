@@ -1,0 +1,35 @@
+- name: Basic system configuration
+  hosts: orchestra-prox
+  become: yes
+  roles:
+    - role: debian-base
+      vars:
+        cloud_init: true
+    - role: install-docker
+      vars:
+        use_docker_repo: true
+    - role: firewalld-base
+      vars:
+        firewall_open_services:
+          - ssh
+          - http
+          - https
+
+- name: Deploy traefik
+  hosts: orchestra-prox
+  roles: 
+    - role: deploy-docker-compose_v2
+      vars:
+        local_path: orchestra/traefik
+        remote_path: /home/nathan/traefik
+        env_variables:
+          CF_API_EMAIL: "{{ cloudflare_email }}"
+          CF_DNS_API_TOKEN: "{{ cloudflare_dns_api_token }}"
+
+- name: Deploy xen-orchestra
+  hosts: orchestra-prox
+  roles: 
+    - role: deploy-docker-compose_v2
+      vars:
+        local_path: orchestra/xen-orchestra
+        remote_path: /home/nathan/xen-orchestra

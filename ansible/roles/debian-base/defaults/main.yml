@@ -1,0 +1,16 @@
+---
+# defaults file for debian-base
+
+unattended_upgrades: true
+set_hostname: false
+stub_resolver: true
+avahi: false
+
+domain: "lanbeforetime.link"
+
+cloud_init: true
+timezone: false
+install_docker: false
+networkd: false
+systemd_resolved: false
+ifname: en

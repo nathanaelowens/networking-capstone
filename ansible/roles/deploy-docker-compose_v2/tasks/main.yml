@@ -1,0 +1,80 @@
+---
+# tasks file for deploy-docker-compose
+
+- name: Ensure remote directory exists
+  file:
+    path: "{{ remote_path }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Sync configuration directory
+  synchronize:
+    src: "{{ local_path }}/"
+    dest: "{{ remote_path }}/"
+    recursive: true
+  register: sync_output
+  when: not delete
+
+- name: Sync configuration directory
+  synchronize:
+    src: "{{ local_path }}/"
+    dest: "{{ remote_path }}/"
+    recursive: true
+    delete: true
+  register: sync_output_delete
+  when: delete
+
+- name: Create .env file with defined variables
+  copy:
+    dest: "{{ remote_path }}/.env"
+    content: |
+      {% for key, value in env_variables.items() %}
+      {{ key }}={{ value }}
+      {% endfor %}
+  when: (env_variables | default({})) | length > 0
+
+- name: Deploy docker compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ remote_path }}"
+  register: deploy_compose
+
+- name: Update images and rebuild containers
+  block:
+    - name: Bring down docker compose containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ remote_path }}"
+        state: absent
+
+    - name: Obtain list of images from compose configuration
+      command: docker compose config --images
+      args:
+        chdir: "{{ remote_path }}"
+      register: compose_images_output
+
+    - name: Pull most recent versions for compose images
+      shell: docker pull {{ item }}
+      loop: "{{ compose_images_output.stdout_lines }}"
+      register: pull_result
+      changed_when: >
+        "Image is up to date for" not in pull_result.stdout
+
+    - name: Start docker compose containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ remote_path }}"
+        state: present
+        remove_orphans: true
+  when: update_images | bool
+
+- name: Stop docker-compose containers
+  community.docker.docker_compose_v2:
+    project_src: "{{ remote_path }}"
+    state: stopped
+  when: ((sync_output.changed | bool) or (sync_output_delete.changed | bool)) and not (deploy_compose.changed | bool)
+
+- name: Restart docker-compose containers
+  community.docker.docker_compose_v2:
+    project_src: "{{ remote_path }}"
+    state: present
+    remove_orphans: true
+  when: ((sync_output.changed | bool) or (sync_output_delete.changed | bool)) and not (deploy_compose.changed | bool)

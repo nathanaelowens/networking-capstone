@@ -1,0 +1,7 @@
+[Match]
+Name=en*
+
+[Network]
+DHCP=yes
+LinkLocalAddressing=ipv6
+Domains=home.owens.life
