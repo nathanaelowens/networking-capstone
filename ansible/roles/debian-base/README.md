@@ -53,4 +53,4 @@ All Rights Reserved.
 Author Information
 ------------------
 
-A human.
+Nathanael Owens, 2024

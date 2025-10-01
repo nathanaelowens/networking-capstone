@@ -1,0 +1,85 @@
+---
+# tasks file for install-docker
+
+- name: Install Docker and docker-compose v1
+  become: yes
+  package:
+    name:
+    - docker.io
+    - docker-compose
+    state: present
+  when: not use_docker_repo | bool
+
+- name: Determine architecture name
+  set_fact:
+    architecture_name: >-
+      {{ 'arm64' if ansible_architecture == 'aarch64'
+      else 'amd64' if ansible_architecture == 'x86_64'
+      else 'unknown' }}
+
+- name: Output debug message if architecture is unknown
+  debug:
+    msg: "Unhandled processor architecture detected: {{ ansible_architecture }}"
+  when: architecture_name == 'unknown'
+
+- name: Determine distribution name
+  set_fact:
+    distribution_name: >-
+      {{ 'debian' if ansible_distribution == 'Debian'
+      else 'ubuntu' if ansible_distribution == 'Ubuntu'
+      else 'unknown' }}
+
+- name: Output debug message if distribution is unknown
+  debug:
+    msg: "Unhandled distribution detected: {{ ansible_distribution }}"
+  when: distribution_name == 'unknown'
+
+- name: Install Docker Engine using Docker repository
+  block:
+    - name: Add Docker GPG key
+      become: yes
+      shell: >
+        curl -fsSL https://download.docker.com/linux/{{ distribution_name }}/gpg |
+        gpg --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg
+      args:
+        creates: /etc/apt/trusted.gpg.d/docker.gpg
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch={{ architecture_name }} signed-by=/etc/apt/trusted.gpg.d/docker.gpg] https://download.docker.com/linux/{{ distribution_name }} {{ ansible_distribution_release }} stable"
+        update_cache: yes
+
+    - name: Install Docker packages
+      become: yes
+      package:
+        name: 
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+  when: (use_docker_repo | bool) and (distribution_name != 'unknown') and (architecture_name != 'unknown')
+
+- name: Start and enable Docker service
+  become: yes
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Ensure ansible_user is a member of docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+  notify: Restart node # Wish I didn't have to, but it's the only thing that works
+
+- name: Enable iptables setting in Docker configuration and disable userland-proxy
+  become: yes
+  copy:
+    src: docker-daemon.json
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+  notify: Restart node # Wish I didn't have to, but it's the only thing that works
+  when: not userland_proxy

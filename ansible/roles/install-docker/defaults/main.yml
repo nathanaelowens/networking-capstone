@@ -1,0 +1,5 @@
+---
+# defaults file for install-docker
+
+use_docker_repo: false
+userland_proxy: true
