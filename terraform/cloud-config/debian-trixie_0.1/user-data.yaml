@@ -11,6 +11,6 @@ users:
     groups: sudo
     lock_passwd: false
     shell: /bin/bash
-    passwd: $6$xyz$DRW03Xv12qZpPjk82QRRdXpX99o.DFZhmQx..jNBu.kb76TmDrzzJ3y8Ob0vcdDcqs/oyxxXu.Ly7KUUuoeQH1
+    passwd: $6$3ffvRy4zP0lAvP3h$cufkyRmsmo07llFkEXs09SEbtzehIwF/S04x2Wr6Dva8Tyj68f1gCsr3GtluVbKtuN1qzgT63pzBURwAjgjkK1
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILPzPxVoIYAzf9lcZzg1qTHjUAkzvslBKaJZS2efW570 nathan@lanbeforetime.link
