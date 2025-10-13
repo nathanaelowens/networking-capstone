@@ -36,7 +36,7 @@ variable "proxmox_token" {
 variable "storage_pool" {
   type        = string
   description = "The name of the storage pool packer will use"
-  default     = "truenas-templates"
+  default     = "truenas_templates"
 }
 
 variable "raw_timestamp" {
@@ -61,7 +61,7 @@ source "proxmox-iso" "debian-trixie" {
     iso_url = "https://cdimage.debian.org/debian-cd/13.1.0/amd64/iso-cd/debian-13.1.0-amd64-netinst.iso"
     iso_checksum = "sha512:873e9aa09a913660b4780e29c02419f8fb91012c8092e49dcfe90ea802e60c82dcd6d7d2beeb92ebca0570c49244eee57a37170f178a27fe1f64a334ee357332"
     type = "ide"
-    iso_storage_pool = "local"
+    iso_storage_pool = "truenas_isos"
     unmount = true
   }
 
@@ -144,9 +144,9 @@ build {
     "sudo rm -f /etc/netplan/00-installer-config.yaml", # Remove installer-generated netplan file
     "usermod -p '!' root", # Make root account unable to be logged into
     "sed -i 's/PermitRootLogin yes/#PermitRootLogin prohibit-password/' /etc/ssh/sshd_config",
-    "DEBIAN_FRONTEND=noninteractive apt remove -y ifupdown", # Remove old ifupdown networking
-    "DEBIAN_FRONTEND=noninteractive apt install -y systemd-resolved", # Install systemd-resolved
-    "DEBIAN_FRONTEND=noninteractive apt clean -y", # Clean apt cache
+    "DEBIAN_FRONTEND=noninteractive apt-get remove -y ifupdown", # Remove old ifupdown networking
+    "DEBIAN_FRONTEND=noninteractive apt-get install -y systemd-resolved", # Install systemd-resolved
+    "DEBIAN_FRONTEND=noninteractive apt-get clean -y", # Clean apt cache
     "cloud-init clean", # Have cloud-init do its cleanup work
     "rm /etc/ssh/ssh_host_*", # Remove ssh host keys, cloud-init will regenerate
     "truncate -s 0 /etc/machine-id /var/lib/dbus/machine-id", # Reset machine-id - DON'T DELETE THE FILE!
