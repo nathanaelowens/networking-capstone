@@ -15,6 +15,18 @@
           - http
           - https
 
+- name: Install tailscale
+  hosts: orchestra-prox
+  become: yes
+  roles:
+    - role: artis3n.tailscale.machine
+      vars:
+        tailscale_authkey: "{{ orchestra_prox_auth_key }}"
+        tailscale_args:
+          --hostname=orchestra-prox
+          --accept-routes=false
+          --accept-dns=false"
+
 - name: Deploy traefik
   hosts: orchestra-prox
   roles: 
