@@ -23,7 +23,7 @@
       vars:
         tailscale_authkey: "{{ orchestra_prox_auth_key }}"
         tailscale_args:
-          --hostname=orchestra-prox
+          "--hostname=orchestra-prox
           --accept-routes=false
           --accept-dns=false"
 
