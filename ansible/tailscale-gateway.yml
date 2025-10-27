@@ -5,9 +5,6 @@
     - role: debian-base
       vars:
         cloud_init: true
-    - role: install-docker
-      vars:
-        use_docker_repo: true
     - role: firewalld-base
       vars:
         firewall_open_services:
