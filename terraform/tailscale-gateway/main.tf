@@ -3,7 +3,7 @@ module "prox-vm" {
     source = "../modules/prox-vm"
 
     vm_id = 124
-    hostname = "ipamserver"
+    hostname = "tailscale-gateway"
     domain   = "lanbeforetime.link"
     ip_address = "192.168.10.24/24"
     ip_default_gateway = "192.168.10.1"
