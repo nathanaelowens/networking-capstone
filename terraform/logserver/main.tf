@@ -13,7 +13,7 @@ module "prox-vm" {
     tags = ["terraform","backup"]
     auto_poweron = true
     cloud_config = "debian-trixie_0.1"
-    vm_template = "debian-trixie-proxtanic2-2025-10-27-05-56-am"
+    vm_template = "debian-trixie-proxtanic2-2025-10-27-10-05-56-am"
     autodetect_net_if = true
     disk_size = 50 #GB
     dedicated_memory = 2048 #MB
