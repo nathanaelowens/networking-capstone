@@ -1,0 +1,54 @@
+- name: Basic system configuration
+  hosts: tailscale-gateway
+  become: yes
+  roles:
+    - role: debian-base
+      vars:
+        cloud_init: true
+    - role: install-docker
+      vars:
+        use_docker_repo: true
+    - role: firewalld-base
+      vars:
+        firewall_open_services:
+          - ssh
+    - role: artis3n.tailscale.machine
+      vars:
+        tailscale_authkey: "{{ tailscale_gateway_auth_key }}"
+        tailscale_args:
+          "--advertise-routes=\
+          192.168.1.10/32,\
+          192.168.1.11/32,\
+          192.168.1.12/32,\
+          192.168.1.13/32
+          --accept-dns=false
+          --accept-routes=false"
+
+- name: Configure sysctl for Tailscale
+  hosts: tailscale-gateway
+  become: yes
+  tasks:
+    - sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+    - sysctl:
+        name: net.ipv6.conf.all.forwarding
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+- name: Configure firewall for masquerade
+  hosts: tailscale-gateway
+  become: yes
+  tasks:
+    - name: Add masquerade rule permanently
+      firewalld:
+        zone: public
+        masquerade: yes
+        permanent: yes
+        immediate: yes
+        state: enabled
