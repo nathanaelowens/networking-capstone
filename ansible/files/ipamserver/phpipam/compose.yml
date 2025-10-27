@@ -1,0 +1,77 @@
+services:
+  phpipam-web:
+    image: phpipam/phpipam-www:1.7x
+    container_name: phpipam
+    networks:
+      - ipam-net         # talk to DB here
+      - traefik-net      # and to Traefik here
+    environment:
+      - TZ=${TZ}
+      - IPAM_DATABASE_HOST=phpipam-mariadb
+      - IPAM_DATABASE_NAME=phpipam
+      - IPAM_DATABASE_USER=phpipam
+      - IPAM_DATABASE_PASS=${PHPIPAM_DB_PASS}
+      - IPAM_DATABASE_WEBHOST=%
+      - IPAM_TRUST_X_FORWARDED=true
+      - IPAM_DISABLE_INSTALLER=1
+    restart: unless-stopped
+    volumes:
+      - ./branding/logo.png:/phpipam/css/images/logo/logo.png:ro
+      - certs:/usr/local/share/ca-certificates:ro
+    depends_on:
+      - phpipam-mariadb
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.services.phpipam.loadbalancer.server.port=80"
+      - "traefik.http.routers.phpipam-tls.rule=Host(`ipamserver.lanbeforetime.link`)"
+      - "traefik.http.routers.phpipam-tls.entrypoints=websecure"
+      - "traefik.http.routers.phpipam-tls.tls=true"
+
+  phpipam-cron:
+    image: phpipam/phpipam-cron:1.7x
+    container_name: phpipam-cron
+    networks:
+      - ipam-net
+    environment:
+      - TZ=${TZ}
+      - IPAM_DATABASE_HOST=phpipam-mariadb
+      - IPAM_DATABASE_PASS=${PHPIPAM_DB_PASS}
+      - SCAN_INTERVAL=1h
+    restart: unless-stopped
+    volumes:
+      - certs:/usr/local/share/ca-certificates:ro
+    depends_on:
+      - phpipam-mariadb
+
+  phpipam-mariadb:
+    image: mariadb:12
+    container_name: phpipam-mariadb
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-name-resolve            # stop reverse DNS stalls
+    networks:
+      - ipam-net
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=phpipam          # create db at init
+      - MYSQL_USER=phpipam              # app user
+      - MYSQL_PASSWORD=${PHPIPAM_DB_PASS}
+    restart: unless-stopped
+    volumes:
+      - database:/var/lib/mysql
+
+volumes:
+  logo:
+    driver: local
+  certs:
+    driver: local
+  database:
+    driver: local
+
+networks:
+  ipam-net:
+    driver: bridge
+  traefik-net:
+    external: true

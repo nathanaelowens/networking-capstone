@@ -1,0 +1,55 @@
+- name: Basic system configuration
+  hosts: ipamserver
+  become: yes
+  roles:
+    - role: debian-base
+      vars:
+        cloud_init: true
+    - role: install-docker
+      vars:
+        use_docker_repo: true
+    - role: firewalld-base
+      vars:
+        firewall_open_services:
+          - ssh
+          - http
+          - https
+        firewall_open_ports:
+          # This is for traefik dashboard
+          - '41235/tcp'
+
+- name: Install tailscale
+  hosts: ipamserver
+  become: yes
+  roles:
+    - role: artis3n.tailscale.machine
+      vars:
+        tailscale_authkey: "{{ ipamserver_auth_key }}"
+        tailscale_args:
+          "--hostname=ipamserver
+          --accept-routes=false
+          --accept-dns=false"
+
+- name: Deploy traefik
+  hosts: ipamserver
+  roles: 
+    - role: deploy-docker-compose_v2
+      vars:
+        local_path: ipamserver/traefik
+        remote_path: /home/groot/traefik
+        env_variables:
+          CF_API_EMAIL: "{{ cloudflare_email }}"
+          CF_DNS_API_TOKEN: "{{ cloudflare_dns_api_token }}"
+
+- name: Deploy phpipam
+  hosts: ipamserver
+  roles: 
+    - role: deploy-docker-compose_v2
+      vars:
+        local_path: ipamserver/phpipam
+        remote_path: /home/nathan/phpipam
+        env_variables:
+          PHPIPAM_DB_PASS: "{{ phpipam_db_password }}"
+          MARIADB_ROOT_PASSWORD: "{{ phpipam_mariadb_root_password }}"
+          TZ: "America/Chicago"
+          PHPIPAM_FQDN: "ipamserver.lanbeforetime.link"
