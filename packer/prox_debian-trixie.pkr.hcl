@@ -130,8 +130,7 @@ build {
     inline = [
     "echo 'manage_etc_hosts: true' >> /etc/cloud/cloud.cfg",
     "dd if=/dev/urandom of=/swapfile bs=1M count=4096",
-    "echo 'swap /swapfile /dev/urandom swap,cipher=aes-xts-plain64,size=512' >> /etc/crypttab",
-    "echo '/dev/mapper/swap none swap sw 0 0' >> /etc/fstab",
+    "echo '/swapfile none swap defaults 0 0' >> /etc/fstab",
     "mkdir -p /etc/systemd/system/systemd-cryptsetup@.service.d",
     "cat >/etc/systemd/system/systemd-cryptsetup@.service.d/override.conf <<EOL",
     "[Unit]",
