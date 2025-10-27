@@ -13,7 +13,7 @@ services:
       - IPAM_DATABASE_PASS=${PHPIPAM_DB_PASS}
       - IPAM_DATABASE_WEBHOST=%
       - IPAM_TRUST_X_FORWARDED=true
-      #- IPAM_DISABLE_INSTALLER=1
+      - IPAM_DISABLE_INSTALLER=1
     restart: unless-stopped
     volumes:
       - ./branding/logo.png:/phpipam/css/images/logo/logo.png:ro
