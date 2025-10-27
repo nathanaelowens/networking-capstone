@@ -1,1 +1,2 @@
 orchestra-prox ansible_host=orchestra-prox.lanbeforetime.link ansible_user=groot ansible_become_pass='{{ groot_password }}' ansible_python_interpreter=/usr/bin/python3
+ipamserver ansible_host=ipamserver.lanbeforetime.link ansible_user=groot ansible_become_pass='{{ groot_password }}' ansible_python_interpreter=/usr/bin/python3
