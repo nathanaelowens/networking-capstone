@@ -57,7 +57,6 @@ services:
       #GRAYLOG_HTTP_EXTERNAL_URI: "http://localhost:9000/"
       GRAYLOG_MONGODB_URI: "mongodb://mongodb:27017/graylog"
     ports:
-    ports:
       - "9000:9000/tcp"   # GUI
       - "5044:5044/tcp"   # Beats
       - "5140:5140/udp"   # Syslog
