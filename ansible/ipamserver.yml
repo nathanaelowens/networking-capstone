@@ -47,7 +47,7 @@
     - role: deploy-docker-compose_v2
       vars:
         local_path: ipamserver/phpipam
-        remote_path: /home/nathan/phpipam
+        remote_path: /home/groot/phpipam
         env_variables:
           PHPIPAM_DB_PASS: "{{ phpipam_db_password }}"
           MARIADB_ROOT_PASSWORD: "{{ phpipam_mariadb_root_password }}"
