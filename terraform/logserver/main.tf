@@ -18,6 +18,7 @@ module "prox-vm" {
     disk_size = 50 #GB
     dedicated_memory = 2048 #MB
     floating_memory = 2048 #MB
+    proxmox_vm_storage = "proxraid2"
 
     proxmox_node = "proxtanic2"
     proxmox_fqdn = "proxtanic2.lanbeforetime.link"
