@@ -1,0 +1,38 @@
+- name: Basic system configuration
+  hosts: intranetserver
+  become: yes
+  roles:
+    - role: debian-base
+      vars:
+        cloud_init: true
+    - role: install-docker
+      vars:
+        use_docker_repo: true
+    - role: firewalld-base
+      vars:
+        firewall_open_ports:
+          - '41235/tcp' # Traefik
+        firewall_open_services:
+          - ssh
+          - http
+          - https
+
+- name: Deploy traefik
+  hosts: intranetserver
+  roles: 
+    - role: deploy-docker-compose_v2
+      vars:
+        local_path: intranetserver/traefik
+        remote_path: /home/groot/traefik
+        env_variables:
+          CF_API_EMAIL: "{{ cloudflare_email }}"
+          CF_DNS_API_TOKEN: "{{ cloudflare_dns_api_token }}"
+
+- name: Deploy heimdall
+  hosts: intranetserver
+  roles: 
+    - role: deploy-docker-compose_v2
+      vars:
+        service_name: heimdall
+        local_path: intranetserver/heimdall
+        remote_path: /home/groot/heimdall
