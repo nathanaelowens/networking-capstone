@@ -1,5 +1,5 @@
 - name: Basic system configuration
-  hosts: logserver
+  hosts: snmpserver
   become: yes
   roles:
     - role: debian-base
@@ -20,7 +20,7 @@
     #      - '41235/tcp'
 
 # - name: Deploy traefik
-#   hosts: logserver
+#   hosts: snmpserver
 #   roles: 
 #     - role: deploy-docker-compose_v2
 #       vars:
@@ -30,13 +30,4 @@
 #           CF_API_EMAIL: "{{ cloudflare_email }}"
 #           CF_DNS_API_TOKEN: "{{ cloudflare_dns_api_token }}"
 
-- name: Deploy graylog
-  hosts: logserver
-  roles: 
-    - role: deploy-docker-compose_v2
-      vars:
-        local_path: logserver/graylog
-        remote_path: /home/groot/graylog
-        env_variables:
-          GRAYLOG_PASSWORD_SECRET: "{{ logserver_graylog_password_secret }}"
-          GRAYLOG_ROOT_PASSWORD_SHA2: "{{ logserver_graylog_root_password_hash }}"
+
