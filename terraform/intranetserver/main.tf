@@ -5,7 +5,7 @@ module "prox-vm" {
     vm_id = 135
     hostname = "intranetserver"
     domain   = "lanbeforetime.link"
-    ip_address = "192.168.10.19/24"
+    ip_address = "192.168.10.35/24"
     ip_default_gateway = "192.168.10.1"
     search_domains = ["lanbeforetime.link"]
     dns_servers = ["192.168.10.20","192.168.10.21"]
