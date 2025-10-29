@@ -32,7 +32,6 @@
       {% for key, value in env_variables.items() %}
       {{ key }}={{ value }}
       {% endfor %}
-  when: (env_variables | default({})) | length > 0
 
 - name: Deploy docker compose
   community.docker.docker_compose_v2:
