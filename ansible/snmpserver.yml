@@ -30,4 +30,17 @@
 #           CF_API_EMAIL: "{{ cloudflare_email }}"
 #           CF_DNS_API_TOKEN: "{{ cloudflare_dns_api_token }}"
 
-
+- name: Deploy librenms
+  hosts: snmpserver
+  roles: 
+    - role: deploy-docker-compose_v2
+      vars:
+        local_path: snmpserver/librenms
+        remote_path: /home/groot/librenms
+        env_variables:
+          TZ: "America/Chicago"
+          PGUID: "1000"
+          PGID: "1000"
+          MYSQL_DATABASE: "librenms"
+          MYSQL_USER: "librenms"
+          MYSQL_PASSWORD: "{{ snmpserver_mysql_password }}"
