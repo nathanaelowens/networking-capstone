@@ -1,0 +1,62 @@
+services:
+  # See https://docs.traefik.io/
+  traefik:
+    container_name: traefik
+    image: traefik:v2.11
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - traefik-net
+    ports:
+      - 80:80
+      - 443:443
+      - 41235:41235
+    volumes:
+      - letsencrypt:/letsencrypt
+      # So traefik can see docker containers
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=PathPrefix(`/api`) || PathPrefix(`/dashboard`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=dashboard"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.justADummyRouter.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.justADummyRouter.tls.domains[0].main=intranetserver.lanbeforetime.link"
+      - "traefik.http.routers.justADummyRouter.tls.domains[0].sans=intranet.lanbeforetime.link"
+    command:
+      # See https://doc.traefik.io/traefik/observability/access-logs/
+      - "--accesslog"
+      - "--log.level=DEBUG"
+
+      - "--api.dashboard"
+      - "--entrypoints.dashboard.address=:41235"
+
+      # See https://doc.traefik.io/traefik/routing/entrypoints/#redirection
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+
+      # Set up the TLS configuration for our websecure listener
+      - "--entrypoints.websecure.http.tls=true"
+
+      # Set up LetsEncrypt
+      #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+
+      # https://doc.traefik.io/traefik/providers/docker/
+      - "--providers.docker"
+      - "--providers.docker.exposedByDefault=false"
+
+networks:
+  traefik-net:
+    name: traefik-net
+    driver: bridge
+
+volumes:
+  letsencrypt:
+    driver: local
