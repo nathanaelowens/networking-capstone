@@ -1,0 +1,61 @@
+#cloud-config
+hostname: ${ hostname }
+fqdn: ${ hostname }.${ domain }
+timezone: America/Chicago
+users:
+  - name: nathan
+    gecos: Nathanael Owens
+    primary_group: nathan
+    groups: sudo
+    lock_passwd: false
+    shell: /bin/bash
+    passwd: $y$j9T$65UrSwVaCG.I.hk.ikHMv1$38lIrsq38AMSX8hev4pIIbpVjZnxfmiIjaQboezvt8D
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBeZjLleKniYbOTl5nmPvYUrXq6TP1cOrqsf04u2DtpF nathan@commodore
+
+package_upgrade: false
+
+# Write SSH daemon configuration overrides
+write_files:
+  - path: /etc/ssh/sshd_config.d/99-hardening.conf
+    owner: root:root
+    permissions: '0644'
+    content: |
+      # Bind SSH to a specific port
+      Port 2222
+
+      # Don't allow root SSH login
+      PermitRootLogin no
+
+      # Disable password authentication
+      PasswordAuthentication no
+
+      # (Optional) Disable keyboard-interactive password prompts
+      KbdInteractiveAuthentication no
+
+runcmd:
+  - |
+    # 1) Disable DO's machine-id hack for good
+    if [ -f /var/lib/cloud/scripts/per-instance/machine_id.sh ]; then
+      cp /var/lib/cloud/scripts/per-instance/machine_id.sh{,.bak} || true
+      printf '#!/bin/sh\n# disabled by user\nexit 0\n' > /var/lib/cloud/scripts/per-instance/machine_id.sh
+      chmod +x /var/lib/cloud/scripts/per-instance/machine_id.sh
+    fi
+
+    # 2) One-time journald alignment
+    if [ ! -f /root/.journald_machineid_fixed ]; then
+      set -e
+      systemctl stop systemd-journald || true
+      rm -rf /var/log/journal/*
+      mkdir -p /var/log/journal
+      systemd-tmpfiles --create --prefix /var/log/journal || true
+      if [ -f /etc/machine-id ]; then
+        ln -sf /etc/machine-id /var/lib/dbus/machine-id
+      fi
+      systemctl start systemd-journald || true
+      logger "journald machine-id alignment completed on first boot"
+      touch /root/.journald_machineid_fixed
+    fi
+
+    # 3) Restart ssh
+    systemctl restart ssh
