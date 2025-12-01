@@ -1,0 +1,35 @@
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:v3.6
+    restart: unless-stopped
+    env_file:
+      - .env
+    network_mode: host
+    volumes:
+      # Mount configuration for genie
+      - ./genie.yml:/etc/traefik/dynamic/genie.yml
+      - letsencrypt:/letsencrypt
+    labels:
+      - "traefik.enable=true"
+    command:
+      - "--accesslog"
+      - "--log.level=DEBUG"
+      # See https://doc.traefik.io/traefik/routing/entrypoints/#redirection
+      - "--entrypoints.web.address=:80"
+
+      - "--entrypoints.websecure.address=:443"
+
+      # Set up LetsEncrypt
+      #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.letsencrypt.acme.email=accounts@owens.life"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+
+      - "--providers.file.directory=/etc/traefik/dynamic"
+
+volumes:
+  letsencrypt:
+    driver: local
