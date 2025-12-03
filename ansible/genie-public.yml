@@ -35,7 +35,7 @@
   roles:
     - role: deploy-docker-compose_v2
       vars:
-        local_path: genie/traefik
+        local_path: genie-public/traefik
         remote_path: /home/nathan/traefik
 
 - name: Prepare user for systemd user services (linger)
