@@ -47,6 +47,9 @@
     genie_user: nathan
     genie_dir: /opt/jenie-genie
   tasks:
+    - name: Install python
+      apt:
+        name: python3
     - name: Enable linger for Genie user
       command: "loginctl enable-linger {{ genie_user }}"
       # Avoid marking as changed every time
