@@ -21,7 +21,7 @@ services:
       - "--entrypoints.websecure.address=:443"
 
       # Set up LetsEncrypt
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.letsencrypt.acme.email=accounts@owens.life"
       - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
 
