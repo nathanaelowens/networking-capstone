@@ -1,0 +1,31 @@
+- name: Basic system configuration
+  hosts: genie
+  become: yes
+  roles:
+    - role: debian-base
+      vars:
+        cloud_init: true # Not actually true, but needed for now
+    - role: install-docker
+      vars:
+        use_docker_repo: true
+    - role: remote-security
+    - role: firewalld-base
+      vars:
+        firewall_open_ports:
+        - '2222/tcp'
+        firewall_open_services:
+          - https
+          - http
+        firewall_closed_services:
+          - ssh
+    - role: remove-ubuntu-motd-spam
+      vars:
+        ubuntu_motd_disable_news: true
+        ubuntu_motd_disable_scripts:
+          - 10-help-text
+          - 50-motd-news
+          - 80-livepatch
+          - 90-updates-available
+          - 91-contract-ua-esm-status
+        ubuntu_motd_static_banner_enabled: false
+        ubuntu_motd_static_banner_text: "Authorized access only. Activity may be monitored.\n"
