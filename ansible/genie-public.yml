@@ -37,6 +37,7 @@
       vars:
         local_path: genie-public/traefik
         remote_path: /home/nathan/traefik
+        env_variables:
 
 - name: Prepare user for systemd user services (linger)
   hosts: genie
