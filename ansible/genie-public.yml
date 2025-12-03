@@ -38,6 +38,7 @@
         local_path: genie-public/traefik
         remote_path: /home/nathan/traefik
         env_variables:
+          CF_API_EMAIL: "{{ cloudflare_email }}"
 
 - name: Prepare user for systemd user services (linger)
   hosts: genie
