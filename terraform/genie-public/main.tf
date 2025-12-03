@@ -10,7 +10,7 @@ resource "digitalocean_droplet" "vpn" {
     })
 
     ssh_keys = [
-      data.digitalocean_ssh_key.???????.id
+      data.digitalocean_ssh_key.commodore.id
     ]
 }
 
