@@ -44,7 +44,7 @@
   hosts: genie
   become: yes
   vars:
-    genie_user: genie
+    genie_user: nathan
     genie_dir: /opt/jenie-genie
   tasks:
     - name: Enable linger for Genie user
@@ -63,7 +63,7 @@
   hosts: genie
   remote_user: "{{ genie_user }}"
   vars:
-    genie_user: genie
+    genie_user: nathan
     genie_service_name: jenie-genie.service
   tasks:
     - name: Ensure systemd user directory exists
