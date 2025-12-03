@@ -4,4 +4,4 @@ intranetserver ansible_host=intranetserver.lanbeforetime.link ansible_user=groot
 logserver ansible_host=logserver.lanbeforetime.link ansible_user=groot ansible_become_pass='{{ groot_password }}' ansible_python_interpreter=/usr/bin/python3
 tailscale-gateway ansible_host=tailscale-gateway.lanbeforetime.link ansible_user=groot ansible_become_pass='{{ groot_password }}' ansible_python_interpreter=/usr/bin/python3
 
-genie ansible_host=genie.jenieit.com ansible_user=nathan ansible_become_pass='{{ grooty_password }}' ansible_python_interpreter=/usr/bin/python3
+genie ansible_host=genie.jenieit.com ansible_port=2222 ansible_user=nathan ansible_become_pass='{{ grooty_password }}' ansible_python_interpreter=/usr/bin/python3
