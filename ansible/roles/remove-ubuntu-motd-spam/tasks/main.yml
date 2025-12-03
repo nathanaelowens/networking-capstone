@@ -1,0 +1,59 @@
+---
+# tasks file for remove-ubuntu-motd-spam
+
+- name: Guardrail, Ubuntu only
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+      - "'Ubuntu' in ansible_facts['distribution']"
+    fail_msg: "ubuntu_motd role is intended for Ubuntu."
+
+- name: Ensure /etc/update-motd.d exists
+  ansible.builtin.file:
+    path: /etc/update-motd.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Disable motd-news (config)
+  ansible.builtin.lineinfile:
+    path: /etc/default/motd-news
+    regexp: '^ENABLED='
+    line: 'ENABLED=0'
+    create: true
+    mode: '0644'
+  when: ubuntu_motd_disable_news
+
+- name: Disable and stop motd-news units
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+    masked: true
+  loop:
+    - motd-news.service
+    - motd-news.timer
+  ignore_errors: true
+  when: ubuntu_motd_disable_news
+
+- name: Quiet noisy MOTD scripts by removing execute bit
+  ansible.builtin.file:
+    path: "/etc/update-motd.d/{{ item }}"
+    state: file
+    owner: root
+    group: root
+    mode: '0644'       # ensures non-executable
+  loop: "{{ ubuntu_motd_disable_scripts }}"
+  register: ubuntu_motd_quiet_results
+  failed_when: false   # some files won't exist depending on release
+
+# --- Optional static /etc/motd banner (pam prints after dynamic motd) ---
+- name: Manage /etc/motd banner
+  ansible.builtin.copy:
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: '0644'
+    content: "{{ ubuntu_motd_static_banner_text }}"
+  when: ubuntu_motd_static_banner_enabled
