@@ -1,0 +1,29 @@
+http:
+  routers:
+    genie:
+      rule: "Host(`genie.jenieit.com`)"
+      entryPoints:
+        - web
+      middlewares:
+        - redirect-to-https
+      service: genie
+
+    genie-tls:
+      rule: "Host(`genie.jenieit.com`)"
+      entryPoints:
+        - websecure
+      service: genie
+      tls:
+        certResolver: letsencrypt
+
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  services:
+    genie:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:8080"

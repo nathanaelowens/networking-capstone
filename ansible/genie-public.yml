@@ -29,3 +29,54 @@
           - 91-contract-ua-esm-status
         ubuntu_motd_static_banner_enabled: false
         ubuntu_motd_static_banner_text: "Authorized access only. Activity may be monitored.\n"
+
+- name: Deploy traefik
+  hosts: genie
+  roles:
+    - role: deploy-docker-compose_v2
+      vars:
+        local_path: genie/traefik
+        remote_path: /home/nathan/traefik
+
+- name: Prepare user for systemd user services (linger)
+  hosts: genie
+  become: yes
+  vars:
+    genie_user: genie
+    genie_dir: /opt/jenie-genie
+  tasks:
+    - name: Enable linger for Genie user
+      command: "loginctl enable-linger {{ genie_user }}"
+      # Avoid marking as changed every time
+      changed_when: false
+    - name: Ensure application directory exists
+      file:
+        path: "{{ genie_dir }}"
+        state: directory
+        owner: "{{ genie_user }}"
+        group: "{{ genie_user }}"
+        mode: "0755"
+
+- name: Install and manage Genie user service
+  hosts: genie
+  remote_user: "{{ genie_user }}"
+  vars:
+    genie_user: genie
+    genie_service_name: jenie-genie.service
+  tasks:
+    - name: Ensure systemd user directory exists
+      file:
+        path: "/home/{{ genie_user }}/.config/systemd/user"
+        state: directory
+        mode: "0755"
+
+    - name: Copy Genie user service unit
+      copy:
+        src: files/{{ genie_service_name }}
+        dest: "/home/{{ genie_user }}/.config/systemd/user/{{ genie_service_name }}"
+        mode: "0644"
+
+    - name: Reload user systemd daemon
+      systemd:
+        daemon_reload: yes
+        scope: user

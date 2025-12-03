@@ -1,0 +1,20 @@
+[Unit]
+Description=Jenie Genie - Public
+After=network.target
+
+[Service]
+# Folder where your code and .env.public live
+WorkingDirectory=/opt/jenie-genie
+
+# Use the venv's Python and your entry script
+ExecStart=/opt/jenie-genie/venv/bin/python server_public.py
+
+# Restart if it crashes
+Restart=on-failure
+RestartSec=5
+
+# (Optional) If your env loader wants a specific env file name:
+# Environment=GENIE_ENV_FILE=.env.public
+
+[Install]
+WantedBy=default.target
