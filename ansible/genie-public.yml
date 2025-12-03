@@ -74,7 +74,7 @@
 
     - name: Copy Genie user service unit
       copy:
-        src: files/{{ genie_service_name }}
+        src: genie-public/{{ genie_service_name }}
         dest: "/home/{{ genie_user }}/.config/systemd/user/{{ genie_service_name }}"
         mode: "0644"
 
